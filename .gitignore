@@ -1,0 +1,6 @@
+# Anything
+.vs/
+GZip/bin/
+GZip/obj/
+*.oz.meta
+*.oz.data
