@@ -14,15 +14,13 @@ namespace GZip
     {
         static int Main(string[] args)
         {
-            var args1 = new string[] { "Compress", @"..\..\anna-karenina.fb2", @"..\..\anna" };
-            var args2 = new string[] { "Decompress", @"..\..\anna", @"..\..\ak.fb2" };
+            // var args1 = new string[] { "Compress", @"..\..\anna-karenina.fb2", @"..\..\anna" };
+            // var args2 = new string[] { "Decompress", @"..\..\anna", @"..\..\ak.fb2" };
 
-            var res = new GZip().Run(new Args(args1));
-            //var res = new GZip().Run(new Args(args2));
+            var res = (int)new GZip().Run(args);
+            // Console.ReadKey();
 
-            Console.ReadKey();
-
-            return (int)res;
+            return res;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace GZip
     class GZip
     {
         public GZip() 
-            : this(500 * 1024, 5)
+            : this(1024 * 1024, 4)
         {
         }
 
@@ -29,25 +29,29 @@ namespace GZip
             this.Threads = threads;
         }
 
-        public virtual Result Run(Args args)
+        public virtual Result Run(string[] input)
         {
-            Action<Args> run = this.Compress;
-
-            if (args.CompressionMode == CompressionMode.Decompress)
-            {
-                run = this.Decompress;
-            }
+            var res = Result.Success;
 
             try
             {
+                var args = new Args(input);
+                var run  = (Action<Args>)this.Compress;
+
+                if (args.CompressionMode == CompressionMode.Decompress)
+                {
+                    run = this.Decompress;
+                }
+
                 run(args);
-                return Result.Success;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                res = Result.Failure;
                 Console.WriteLine($"\nError: {ex.GetBaseException().Message}");
-                return Result.Failure;
             }
+
+            return res;
         }
 
         protected virtual void Compress(Args args)
@@ -63,11 +67,13 @@ namespace GZip
                 var input = new FileInfo(args.InputFile);
                 Console.WriteLine($"\nInput: {args.InputFile} ({Math.Round(input.Length / 1024d, 2)} kb)");
 
-                var len = 0;
+                var len = 0L;
                 var inc = 0;
 
                 var threads = new List<Thread>();
                 var queue   = new Queue<int>();
+
+                Console.WriteLine("Status: in progress");
                 
                 for (int i = 0; i < this.Threads && len < input.Length; i++)
                 {
@@ -75,7 +81,7 @@ namespace GZip
                     {
                         using (var fs = input.OpenRead())
                         {
-                            var skip = (int)val;
+                            var skip = (long)val;
 
                             while (input.Length > skip)
                             {
@@ -165,7 +171,7 @@ namespace GZip
                 bf.Serialize(fs, meta);
 
                 Console.WriteLine($"{args.OutputFile + args.MetaExt} ({Math.Round(fs.Length / 1024d, 2)} kb)");
-                Console.WriteLine("\nDone!");
+                Console.WriteLine("Status: done");
             }
         }
 
@@ -193,6 +199,8 @@ namespace GZip
 
                 var threads = new List<Thread>(thread_count);
                 var queue   = new Queue<int>(thread_count);
+
+                Console.WriteLine("Status: in progress");
 
                 for (; pos < thread_count; pos++)
                 {
@@ -260,7 +268,7 @@ namespace GZip
                 }
 
                 Console.WriteLine($"Output: {args.OutputFile} ({Math.Round(output.Length / 1024d, 2)} kb)");
-                Console.WriteLine("\nDone!");
+                Console.WriteLine("Status: done");
             }
         }
 
